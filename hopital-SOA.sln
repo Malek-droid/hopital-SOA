@@ -1,0 +1,32 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{5854FF58-B8C5-05C6-5BF2-ACE42193F22B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "facturisation-service", "facturisation-service", "{26544B89-254E-FFAF-3B0B-788EEB357FB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "facturisationService", "services\facturisation-service\facturisationService\facturisationService.csproj", "{D6828EB8-093D-C788-94E6-67CF6D08D6F7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D6828EB8-093D-C788-94E6-67CF6D08D6F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6828EB8-093D-C788-94E6-67CF6D08D6F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6828EB8-093D-C788-94E6-67CF6D08D6F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6828EB8-093D-C788-94E6-67CF6D08D6F7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{26544B89-254E-FFAF-3B0B-788EEB357FB0} = {5854FF58-B8C5-05C6-5BF2-ACE42193F22B}
+		{D6828EB8-093D-C788-94E6-67CF6D08D6F7} = {26544B89-254E-FFAF-3B0B-788EEB357FB0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88954793-E1AB-4C18-91F7-590714C9967A}
+	EndGlobalSection
+EndGlobal

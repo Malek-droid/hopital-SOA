@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "58/dTjHpHiw=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\malek\\hopital-SOA\\SoapClient\\SoapClient.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\malek\\.nuget\\packages\\system.security.principal.windows\\5.0.0\\system.security.principal.windows.5.0.0.nupkg.sha512",
+    "C:\\Users\\malek\\.nuget\\packages\\system.servicemodel.http\\10.0.652802\\system.servicemodel.http.10.0.652802.nupkg.sha512",
+    "C:\\Users\\malek\\.nuget\\packages\\system.servicemodel.primitives\\10.0.652802\\system.servicemodel.primitives.10.0.652802.nupkg.sha512"
+  ],
+  "logs": []
+}
