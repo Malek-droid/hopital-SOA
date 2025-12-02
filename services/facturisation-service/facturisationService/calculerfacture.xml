@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <tem:CalculerFacture>
+      <tem:patientId>12</tem:patientId>
+      <tem:montant>200</tem:montant>
+    </tem:CalculerFacture>
+  </soapenv:Body>
+</soapenv:Envelope>

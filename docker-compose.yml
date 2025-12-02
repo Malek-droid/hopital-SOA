@@ -1,0 +1,11 @@
+version: '29.0.1'
+services:
+  facturation:
+    build: ./services/facturisation-service/facturisationService
+    image: facturisation:latest
+    container_name: facturation
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "8081:80"
+    depends_on: []
