@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interface de Facturation</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #ebf4ff 0%, #e0e7ff 100%);
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .header-icon {
+        width: 40px;
+        height: 40px;
+        background: #2563eb;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+      }
+
+      .header-text h1 {
+        font-size: 1.875rem;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+      }
+
+      .header-text p {
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      .input-with-icon {
+        position: relative;
+      }
+
+      .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+      }
+
+      .input-with-icon input {
+        padding-left: 2.5rem;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .btn:hover:not(:disabled) {
+        background: #1d4ed8;
+      }
+
+      .btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .alert {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border-radius: 8px;
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .alert-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+      }
+
+      .alert-error .alert-icon {
+        color: #dc2626;
+      }
+
+      .alert-error h3 {
+        color: #7f1d1d;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+      }
+
+      .alert-error p {
+        color: #991b1b;
+        font-size: 0.875rem;
+      }
+
+      .result-card {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
+        border: 1px solid #86efac;
+        border-radius: 8px;
+      }
+
+      .result-header {
+        display: flex;
+        align-items: start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .result-header .icon {
+        color: #16a34a;
+        font-size: 24px;
+      }
+
+      .result-header h3 {
+        color: #14532d;
+        font-size: 1.125rem;
+        font-weight: 600;
+      }
+
+      .result-header p {
+        color: #15803d;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+
+      .raw-response {
+        margin-top: 1rem;
+        background: white;
+        border: 1px solid #86efac;
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-x: auto;
+      }
+
+      .raw-response pre {
+        font-size: 0.75rem;
+        color: #374151;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <div class="header">
+          <div class="header-icon">🧾</div>
+          <div class="header-text">
+            <h1>Facture</h1>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="patientId">ID Patient</label>
+          <input
+            type="number"
+            id="patientId"
+            placeholder="Entrer l'ID de Patient"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="montant">Montant</label>
+          <div class="input-with-icon">
+            <span class="input-icon">€</span>
+            <input
+              type="number"
+              id="montant"
+              step="0.01"
+              placeholder="Entrer le Montant"
+            />
+          </div>
+        </div>
+
+        <button class="btn" id="submitBtn" onclick="handleSubmit()">
+          <span>🧮</span>
+          <span id="btnText">Calculer la facture</span>
+        </button>
+
+        <div id="errorAlert" class="alert alert-error hidden">
+          <div class="alert-icon">⚠️</div>
+          <div>
+            <h3>Erreur</h3>
+            <p id="errorMessage"></p>
+          </div>
+        </div>
+
+        <div id="resultCard" class="result-card hidden">
+          <div class="result-header">
+            <div class="icon">✅</div>
+            <div>
+              <h3>Facture Calculée avec succès!</h3>
+              <p id="patientInfo"></p>
+            </div>
+          </div>
+
+          <div id="rawResponse" class="raw-response hidden">
+            <pre id="rawResponseText"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let rawResponseData = "";
+
+      // Add Enter key support
+      document.getElementById("patientId").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleSubmit();
+      });
+
+      document.getElementById("montant").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleSubmit();
+      });
+
+      function showError(message) {
+        document.getElementById("errorMessage").textContent = message;
+        document.getElementById("errorAlert").classList.remove("hidden");
+        document.getElementById("resultCard").classList.add("hidden");
+      }
+
+      function hideError() {
+        document.getElementById("errorAlert").classList.add("hidden");
+      }
+
+      function setLoading(isLoading) {
+        const btn = document.getElementById("submitBtn");
+
+        if (isLoading) {
+          btn.disabled = true;
+          btn.innerHTML =
+            '<div class="spinner"></div><span>Calcul en cours...</span>';
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = "<span>🧮</span><span>Calculer la facture</span>";
+        }
+      }
+
+      function parseResponse(xmlText) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+        const resultNode = xmlDoc.getElementsByTagName(
+          "CalculerFactureResult"
+        )[0];
+        if (resultNode) {
+          // Response format: "FACT-1-20251214... - Total: 121.98"
+          const text = resultNode.textContent;
+          const match = text.match(/Total:\s*([\d.]+)/);
+          const total = match ? parseFloat(match[1]) : null;
+          const numeroFacture = text.split(' - ')[0];
+          return { total, numeroFacture, rawText: text };
+        }
+        return null;
+      }
+
+      function displayResult(result, patientId, montant) {
+        document.getElementById(
+          "patientInfo"
+        ).textContent = `N° Facture: ${result.numeroFacture} | Patient: ${patientId} | Montant: ${parseFloat(
+          montant
+        ).toFixed(2)}€ | Total: ${result.total.toFixed(2)}€`;
+
+        document.getElementById("resultCard").classList.remove("hidden");
+      }
+
+      async function callSoapService(patientId, montant) {
+        const soapEnvelope = `<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <tem:CalculerFacture>
+      <tem:patientId>${patientId}</tem:patientId>
+      <tem:montant>${montant}</tem:montant>
+    </tem:CalculerFacture>
+  </soapenv:Body>
+</soapenv:Envelope>`;
+
+        const response = await fetch(
+          "http://localhost:8082/FactureService.svc",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/xml; charset=utf-8",
+              SOAPAction: "http://tempuri.org/IFactureService/CalculerFacture",
+            },
+            body: soapEnvelope,
+          }
+        );
+
+        const text = await response.text();
+        rawResponseData = text;
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${text}`);
+        }
+
+        const result = parseResponse(text);
+        if (result === null) {
+          throw new Error("Impossible d'analyser la réponse");
+        }
+
+        return result;
+      }
+
+      async function handleSubmit() {
+        hideError();
+
+        const patientId = document.getElementById("patientId").value;
+        const montant = document.getElementById("montant").value;
+
+        // Validation
+        if (!patientId || !montant) {
+          showError("Veuillez remplir tous les champs");
+          return;
+        }
+
+        if (isNaN(patientId) || isNaN(montant)) {
+          showError(
+            "L'ID patient et le montant doivent être des nombres valides"
+          );
+          return;
+        }
+
+        if (parseFloat(montant) <= 0) {
+          showError("Le montant doit être supérieur à 0");
+          return;
+        }
+
+        // Call service
+        setLoading(true);
+        try {
+          const result = await callSoapService(patientId, montant);
+          displayResult(result, patientId, montant);
+        } catch (error) {
+          showError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      }
+    </script>
+  </body>
+</html>

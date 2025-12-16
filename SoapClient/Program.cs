@@ -16,8 +16,13 @@ class Program
     {
         try
         {
-            var binding = new BasicHttpBinding();
-            var endpoint = new EndpointAddress("http://localhost:5196/FactureService.svc");
+            var binding = new BasicHttpBinding(BasicHttpSecurityMode.None)
+            {
+                MessageEncoding = WSMessageEncoding.Text
+};
+
+            var endpoint = new EndpointAddress("http://localhost:8081/FactureService.svc");
+
 
             var channelFactory = new ChannelFactory<IFactureService>(binding, endpoint);
             var client = channelFactory.CreateChannel();

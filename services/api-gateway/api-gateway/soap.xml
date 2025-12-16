@@ -1,0 +1,12 @@
+@'
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <TestMethod xmlns="http://tempuri.org/">
+            <input>test123</input>
+        </TestMethod>
+    </soap:Body>
+</soap:Envelope>
+'@ | Out-File -FilePath "soap.xml" -Encoding UTF8

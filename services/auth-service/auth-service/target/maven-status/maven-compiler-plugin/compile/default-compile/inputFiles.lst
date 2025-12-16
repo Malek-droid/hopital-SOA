@@ -1,0 +1,13 @@
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\service\CustomUserDetailsService.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\AuthServiceApplication.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\service\UserService.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\controller\AuthController.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\controller\RedirectController.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\dto\LoginRequest.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\entity\User.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\security\JwtUtil.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\security\JwtFilter.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\config\SecurityConfig.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\dto\AuthResponse.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\controller\WebController.java
+C:\Users\malek\hopital-SOA\services\auth-service\auth-service\src\main\java\com\hospital\auth\repository\UserRepository.java

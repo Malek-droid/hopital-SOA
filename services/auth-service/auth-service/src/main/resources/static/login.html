@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Hôpital</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #2980b9; }
+        .error { color: #e74c3c; text-align: center; margin-top: 10px; }
+        .success { color: #27ae60; text-align: center; margin-top: 10px; }
+        .link { text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Connexion</h1>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn">Se Connecter</button>
+        </form>
+        <div id="message"></div>
+        <div class="link">
+            <a href="signup.html">Créer un nouveau compte</a> | 
+            <a href="index.html">Accueil</a>
+        </div>
+    </div>
+
+    <script>
+       document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    // Afficher loading
+    document.getElementById('message').innerHTML = '<div style="color: blue;">Connexion en cours...</div>';
+    
+    try {
+
+        // Validation: utilise une URL relative pour fonctionner via Gateway (8082) ou Direct (8083)
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        // Vérifier si la réponse est vide
+        const responseText = await response.text();
+        
+        if (responseText === '') {
+            throw new Error('Réponse vide du serveur - Vérifiez que Spring Boot est démarré');
+        }
+        
+        // Parser le JSON seulement si la réponse n'est pas vide
+        const data = JSON.parse(responseText);
+        
+        if (response.ok) {
+            // Sauvegarder le token
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify({
+                email: data.email,
+                role: data.role
+            }));
+            
+            document.getElementById('message').innerHTML = 
+                `<div class="success">${data.message} Redirection...</div>`;
+            
+            // 🔄 REDIRECTION SELON LE RÔLE
+            setTimeout(() => {
+                const userRole = data.role;
+                let redirectPage = 'dashboard.html';
+                
+                // ADMIN -> Pharmacie Service
+                if (userRole === 'ADMIN') {
+                     window.location.href = '/pharmacie-app/'; 
+                     return;
+                }
+                
+                // DOCTOR -> Gestion des rendez-vous
+                if (userRole === 'DOCTOR') {
+                    redirectPage = 'rendezvous-dashboard.html';
+                }
+                
+                // PATIENT reste sur le dashboard normal (ou facture service après rendez-vous)
+                
+                console.log(`Redirection ${userRole} vers: ${redirectPage}`);
+                window.location.href = redirectPage + '?v=2';
+            }, 2000);
+            
+        } else {
+            document.getElementById('message').innerHTML = 
+                `<div class="error">${data.message || 'Erreur inconnue'}</div>`;
+        }
+    } catch (error) {
+        console.error('Erreur détaillée:', error);
+        document.getElementById('message').innerHTML = 
+            `<div class="error">Erreur: ${error.message}</div>`;
+    }
+});
+    </script>
+</body>
+</html>

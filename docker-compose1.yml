@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # Base de données MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: hospital-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: hospital_db
+      MYSQL_USER: hospital_user
+      MYSQL_PASSWORD: StrongPass123!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - hospital-network
+    cpus: "0.5"
+    memory: 512M
+
+  # Service d'authentification
+  auth-service:
+    build: ./services/auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/hospital_auth?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: hospital_user
+      SPRING_DATASOURCE_PASSWORD: StrongPass123!
+      JWT_SECRET: mySecretKeyForJWTGenerationInHospitalSOASystem2024
+      JWT_EXPIRATION: 86400000
+    depends_on:
+      - mysql-db
+    networks:
+      - hospital-network
+    restart: unless-stopped
+    cpus: "0.5"
+    memory: 512M
+
+  # Service de rendez-vous SOAP
+  rendezvous-service:
+    build: ./services/rendezvous-service
+    container_name: rendezvous-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/hospital_rendezvous?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: hospital_user
+      SPRING_DATASOURCE_PASSWORD: StrongPass123!
+      JWT_SECRET: mySecretKeyForJWTGenerationInHospitalSOASystem2024
+    depends_on:
+      - mysql-db
+      - auth-service
+    networks:
+      - hospital-network
+    restart: unless-stopped
+    cpus: "0.5"
+    memory: 512M
+
+volumes:
+  mysql_data:
+
+
+networks:
+  hospital-network:
+    driver: bridge

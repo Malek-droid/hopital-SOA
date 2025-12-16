@@ -1,0 +1,13 @@
+com\hospital\rendezvous\entity\Appointment.class
+com\hospital\rendezvous\ws\RendezvousWS.class
+com\hospital\rendezvous\config\StaticResourceConfig.class
+com\hospital\rendezvous\config\CorsConfig.class
+com\hospital\rendezvous\RendezvousServiceApplication.class
+com\hospital\rendezvous\service\AppointmentService.class
+com\hospital\rendezvous\repository\AppointmentRepository.class
+com\hospital\rendezvous\util\JwtUtil.class
+com\hospital\rendezvous\ws\RendezvousWSImpl.class
+com\hospital\rendezvous\config\CxfConfig.class
+com\hospital\rendezvous\interceptor\JwtSoapInterceptor.class
+com\hospital\rendezvous\config\WebConfig.class
+com\hospital\rendezvous\controller\PageController.class

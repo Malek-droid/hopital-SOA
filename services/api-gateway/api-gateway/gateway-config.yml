@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        # Default route
+        - id: default-route
+          uri: http://facturation:80
+          predicates:
+            - Path=/**
+        
+        # Specific SOAP route  
+        - id: facture-service
+          uri: http://facturation:80
+          predicates:
+            - Path=/FactureService.svc/**

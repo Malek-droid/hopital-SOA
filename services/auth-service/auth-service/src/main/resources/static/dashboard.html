@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Rendez-vous - Hôpital</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #3498db; padding-bottom: 15px; }
+        .user-info { background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .btn { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #2980b9; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-success { background: #27ae60; }
+        .btn-success:hover { background: #219a52; }
+        .section { margin: 30px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .appointment-list { max-height: 400px; overflow-y: auto; }
+        .appointment-item { padding: 10px; border: 1px solid #eee; margin: 5px 0; border-radius: 4px; background: #f9f9f9; }
+        .error { color: #e74c3c; background: #fadbd8; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .success { color: #27ae60; background: #d5f4e6; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .loading { color: #3498db; text-align: center; padding: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Gestion des Rendez-vous SOAP</h1>
+            <div>
+                <button class="btn" onclick="testConnection()">Tester Connexion SOAP</button>
+                <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+
+        <div class="user-info">
+            <h3>Informations Utilisateur</h3>
+            <div id="userDetails"></div>
+        </div>
+
+        <!-- Section Test de Connexion -->
+        <div class="section">
+            <h2>🔗 Test de Connexion SOAP</h2>
+            <button class="btn" onclick="testConnection()">Tester la connexion au service</button>
+            <div id="testResult"></div>
+        </div>
+
+        <!-- Section Création de Rendez-vous -->
+        <div class="section">
+            <h2>📅 Nouveau Rendez-vous</h2>
+            <form id="createAppointmentForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="patientId">ID Patient:</label>
+                        <input type="text" id="patientId" name="patientId" required placeholder="ex: PATIENT_001">
+                    </div>
+                    <div class="form-group">
+                        <label for="doctorId">ID Docteur:</label>
+                        <input type="number" id="doctorId" name="doctorId" required placeholder="ex: 1" min="1">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label for="appointmentDate">Date:</label>
+                        <input type="date" id="appointmentDate" name="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentTime">Heure:</label>
+                        <input type="time" id="appointmentTime" name="appointmentTime" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="appointmentType">Type de rendez-vous:</label>
+                    <select id="appointmentType" name="appointmentType" required>
+                        <option value="">Sélectionnez un type</option>
+                        <option value="CONSULTATION">Consultation</option>
+                        <option value="URGENCE">Urgence</option>
+                        <option value="CONTROLE">Contrôle</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reason">Raison/Motif:</label>
+                    <textarea id="reason" name="reason" rows="3" required placeholder="Décrivez la raison de la consultation..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success">Créer Rendez-vous</button>
+            </form>
+            <div id="createResult"></div>
+        </div>
+
+        <!-- Section Recherche de Rendez-vous -->
+        <div class="section">
+            <h2>🔍 Rechercher Rendez-vous par Patient</h2>
+            <div style="display: flex; gap: 10px; align-items: end;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="searchPatientId">ID Patient:</label>
+                    <input type="text" id="searchPatientId" name="searchPatientId" placeholder="ex: PATIENT_001">
+                </div>
+                <button class="btn" onclick="searchAppointments()">Rechercher</button>
+            </div>
+            <div id="searchResult" class="appointment-list"></div>
+        </div>
+
+        <!-- Section Annulation de Rendez-vous -->
+        <div class="section">
+            <h2>❌ Annuler un Rendez-vous</h2>
+            <div style="display: flex; gap: 10px; align-items: end;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="cancelAppointmentId">ID Rendez-vous:</label>
+                    <input type="number" id="cancelAppointmentId" name="cancelAppointmentId" placeholder="ex: 1" min="1">
+                </div>
+                <button class="btn btn-danger" onclick="cancelAppointment()">Annuler Rendez-vous</button>
+            </div>
+            <div id="cancelResult"></div>
+        </div>
+
+        <!-- Section Détails Rendez-vous -->
+        <div class="section">
+            <h2>📋 Détails d'un Rendez-vous</h2>
+            <div style="display: flex; gap: 10px; align-items: end;">
+                <div class="form-group" style="flex: 1;">
+                    <label for="detailsAppointmentId">ID Rendez-vous:</label>
+                    <input type="number" id="detailsAppointmentId" name="detailsAppointmentId" placeholder="ex: 1" min="1">
+                </div>
+                <button class="btn" onclick="getAppointmentDetails()">Voir Détails</button>
+            </div>
+            <div id="detailsResult"></div>
+        </div>
+    </div>
+
+    <script>
+        // Vérifier l'authentification
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
+        if (!token) {
+            alert('Veuillez vous connecter d\'abord');
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userDetails').innerHTML = `
+                <p><strong>Email:</strong> ${user.email}</p>
+                <p><strong>Rôle:</strong> ${user.role}</p>
+                <p><strong>Service:</strong> Gestion des Rendez-vous SOAP</p>
+            `;
+        }
+
+        // Fonctions SOAP
+        async function testConnection() {
+            try {
+                showLoading('testResult', 'Test de connexion en cours...');
+                const response = await sendSoapRequest('testConnection', '');
+                document.getElementById('testResult').innerHTML = 
+                    `<div class="success">✅ ${response}</div>`;
+            } catch (error) {
+                document.getElementById('testResult').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        // Gestion du formulaire de création
+        document.getElementById('createAppointmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const date = document.getElementById('appointmentDate').value;
+            const time = document.getElementById('appointmentTime').value;
+            
+            if (!date || !time) {
+                document.getElementById('createResult').innerHTML = 
+                    `<div class="error">❌ Veuillez sélectionner une date et une heure</div>`;
+                return;
+            }
+
+            const formData = {
+                patientId: document.getElementById('patientId').value,
+                doctorId: parseInt(document.getElementById('doctorId').value),
+                dateTime: `${date}T${time}:00`,
+                type: document.getElementById('appointmentType').value,
+                reason: document.getElementById('reason').value
+            };
+
+            try {
+                showLoading('createResult', 'Création du rendez-vous en cours...');
+                const response = await sendSoapRequest('createAppointment', 
+                    `<patientId>${formData.patientId}</patientId>
+                     <doctorId>${formData.doctorId}</doctorId>
+                     <dateTime>${formData.dateTime}</dateTime>
+                     <type>${formData.type}</type>
+                     <reason>${formData.reason}</reason>`);
+                
+                document.getElementById('createResult').innerHTML = 
+                    `<div class="success">✅ ${response}</div>`;
+                
+                // Réinitialiser le formulaire
+                this.reset();
+                // Redéfinir la date d'aujourd'hui
+                document.getElementById('appointmentDate').valueAsDate = new Date();
+            } catch (error) {
+                document.getElementById('createResult').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        });
+
+        async function searchAppointments() {
+            const patientId = document.getElementById('searchPatientId').value;
+            if (!patientId) {
+                alert('Veuillez entrer un ID patient');
+                return;
+            }
+
+            try {
+                showLoading('searchResult', 'Recherche des rendez-vous en cours...');
+                const response = await sendSoapRequest('listAppointmentsByPatient', 
+                    `<patientId>${patientId}</patientId>`);
+                
+                const resultDiv = document.getElementById('searchResult');
+                if (Array.isArray(response) && response.length > 0) {
+                    resultDiv.innerHTML = '<h4>Rendez-vous trouvés:</h4>' + 
+                        response.map(app => 
+                            `<div class="appointment-item">📅 ${app}</div>`
+                        ).join('');
+                } else {
+                    resultDiv.innerHTML = '<div class="appointment-item">ℹ️ Aucun rendez-vous trouvé pour ce patient</div>';
+                }
+            } catch (error) {
+                document.getElementById('searchResult').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        async function cancelAppointment() {
+            const appointmentId = document.getElementById('cancelAppointmentId').value;
+            if (!appointmentId) {
+                alert('Veuillez entrer un ID de rendez-vous');
+                return;
+            }
+
+            try {
+                showLoading('cancelResult', 'Annulation du rendez-vous en cours...');
+                const response = await sendSoapRequest('cancelAppointment', 
+                    `<appointmentId>${appointmentId}</appointmentId>`);
+                
+                document.getElementById('cancelResult').innerHTML = 
+                    `<div class="success">✅ Rendez-vous ${appointmentId} ${response ? 'annulé avec succès' : 'non trouvé'}</div>`;
+                
+                document.getElementById('cancelAppointmentId').value = '';
+            } catch (error) {
+                document.getElementById('cancelResult').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        async function getAppointmentDetails() {
+            const appointmentId = document.getElementById('detailsAppointmentId').value;
+            if (!appointmentId) {
+                alert('Veuillez entrer un ID de rendez-vous');
+                return;
+            }
+
+            try {
+                showLoading('detailsResult', 'Récupération des détails...');
+                const response = await sendSoapRequest('getAppointmentDetails', 
+                    `<appointmentId>${appointmentId}</appointmentId>`);
+                
+                document.getElementById('detailsResult').innerHTML = 
+                    `<div class="appointment-item">📋 ${response}</div>`;
+                
+            } catch (error) {
+                document.getElementById('detailsResult').innerHTML = 
+                    `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        // Fonction utilitaire pour envoyer des requêtes SOAP
+        async function sendSoapRequest(operation, body) {
+            const soapRequest = `
+                <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://hospital.com/rendezvous">
+                    <soap:Header>
+                        <Authorization xmlns="http://hospital.com/rendezvous">Bearer ${token}</Authorization>
+                    </soap:Header>
+                    <soap:Body>
+                        <tns:${operation}>
+                            ${body}
+                        </tns:${operation}>
+                    </soap:Body>
+                </soap:Envelope>
+            `;
+
+            console.log(`Envoi SOAP ${operation}:`, soapRequest);
+
+            // Use absolute URL to Gateway to ensure it works even if user accesses via Auth Service (8083)
+            const response = await fetch('http://localhost:8082/services/RendezvousService', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/xml; charset=utf-8',
+                    'SOAPAction': ''
+                },
+                body: soapRequest
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+            }
+
+            const responseText = await response.text();
+            console.log(`Réponse SOAP ${operation}:`, responseText);
+            return parseSoapResponse(responseText, operation);
+        }
+
+        // Parser la réponse SOAP
+        function parseSoapResponse(xmlResponse, operation) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlResponse, 'text/xml');
+            
+            // Gérer les erreurs SOAP
+            const fault = xmlDoc.getElementsByTagName('soap:Fault')[0] || xmlDoc.getElementsByTagName('fault')[0];
+            if (fault) {
+                const faultString = fault.getElementsByTagName('faultstring')[0];
+                throw new Error(faultString ? faultString.textContent : 'Erreur SOAP inconnue');
+            }
+
+            // Extraire la réponse
+            const returnElements = xmlDoc.getElementsByTagName('return');
+            
+            // Pour les tableaux
+            if (operation === 'listAppointmentsByPatient') {
+                return Array.from(returnElements).map(el => el.textContent);
+            }
+
+            // Pour les booléens
+            if (operation === 'cancelAppointment') {
+                return returnElements[0]?.textContent === 'true';
+            }
+
+            // Pour les strings
+            return returnElements[0]?.textContent || 'Réponse vide';
+        }
+
+        function showLoading(elementId, message) {
+            document.getElementById(elementId).innerHTML = `<div class="loading">⏳ ${message}</div>`;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        // Initialisation : définir la date d'aujourd'hui par défaut
+        document.getElementById('appointmentDate').valueAsDate = new Date();
+    </script>
+</body>
+</html>

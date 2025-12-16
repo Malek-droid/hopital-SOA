@@ -1,0 +1,15 @@
+# 1. Create the XML file
+echo '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:fac="http://tempuri.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <fac:TestMethod>
+         <fac:input>test123</fac:input>
+      </fac:TestMethod>
+   </soapenv:Body>
+</soapenv:Envelope>'  soap.xml
+
+# 2. Send the request
+curl -X POST http://localhost:8081/FactureService.svc \
+  -H "Content-Type: text/xml" \
+  -H "SOAPAction: \"http://tempuri.org/IFactureService/TestMethod\"" \
+  -d @soap.xml

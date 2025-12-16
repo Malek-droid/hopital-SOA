@@ -9,6 +9,6 @@ namespace FacturisationServiceNamespace.Interfaces
         string TestMethod(string input);
 
         [OperationContract]
-        double CalculerFacture(int patientId, double montant);
+        string CalculerFacture(int patientId, double montant, int[] medicamentIds);
     }
 }

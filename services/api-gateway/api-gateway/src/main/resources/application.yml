@@ -1,0 +1,88 @@
+server:
+  port: 8081 # Internal port inside container
+
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            # FIX: Use allowedOriginPatterns instead of allowedOrigins
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: false
+            maxAge: 3600
+      routes:
+        # UI Routes -> Auth Service (High Priority for specific files)
+        - id: auth-ui-static
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/login.html,/signup.html,/dashboard.html,/rendezvous-dashboard.html,/index.html,/*.css,/*.js
+
+        # UI Routes -> Auth Service (Controller Paths)
+        - id: auth-ui-paths
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/,/login,/signup,/dashboard,/rendezvous-dashboard
+
+        # Route for Auth Service (REST) - MUST COME BEFORE DEFAULT
+        - id: auth-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/api/auth/**
+
+        # Route for Rendezvous Service (SOAP) - FIXED PATH
+        - id: rendezvous-service
+          uri: http://rendezvous-service:8083
+          predicates:
+            - Path=/services/RendezvousService,/services/RendezvousService/**
+          # No StripPrefix - preserve full path /services/RendezvousService
+
+        # Route for SOAP service - exact path
+        - id: facture-service-exact
+          uri: http://facturation:80
+          predicates:
+            - Path=/FactureService.svc
+          filters:
+            - StripPrefix=0
+
+        # Route for SOAP service - with subpaths
+        - id: facture-service
+          uri: http://facturation:80
+          predicates:
+            - Path=/FactureService.svc/**
+          filters:
+            - StripPrefix=0
+
+        # Route for Patients App (UI + API)
+        - id: patients-service
+          uri: http://patients-service:3001
+          predicates:
+            - Path=/patients-app/**
+          filters:
+            - StripPrefix=1
+
+        # Route for Pharmacie App (UI + API)
+        - id: pharmacie-service
+          uri: http://pharmacie-service:8000
+          predicates:
+            - Path=/pharmacie-app/**
+          filters:
+            - StripPrefix=1
+
+        # Default route - forward everything to facturisation
+        - id: default-route
+          uri: http://facturation:80
+          predicates:
+            - Path=/**
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG

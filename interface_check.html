@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des Patients</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-refresh {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: #f5f5f5;
+    }
+
+    .message {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #999;
+      padding: 40px;
+      font-size: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      table {
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏥 Gestion des Patients</h1>
+
+    <!-- Formulaire d'ajout -->
+    <div class="card">
+      <h2>Ajouter un nouveau patient</h2>
+      <div id="formMessage"></div>
+      <form id="patientForm">
+        <div class="form-group">
+          <label for="nom">Nom *</label>
+          <input type="text" id="nom" required>
+        </div>
+        <div class="form-group">
+          <label for="prenom">Prénom *</label>
+          <input type="text" id="prenom" required>
+        </div>
+        <div class="form-group">
+          <label for="date_naissance">Date de naissance</label>
+          <input type="date" id="date_naissance">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email">
+        </div>
+        <div class="form-group">
+          <label for="telephone">Téléphone</label>
+          <input type="tel" id="telephone">
+        </div>
+        <button type="submit">Ajouter le patient</button>
+      </form>
+    </div>
+
+    <!-- Liste des patients -->
+    <div class="card">
+      <h2>Liste des patients</h2>
+      <button class="btn-refresh" onclick="loadPatients()">🔄 Rafraîchir</button>
+      <div id="listMessage"></div>
+      <div id="patientsTable"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = (window.location.port === '3001') ? '' : '/patients-app';
+
+    // Charger les patients au démarrage
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPatients();
+    });
+
+    // Soumettre le formulaire
+    document.getElementById('patientForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        nom: document.getElementById('nom').value,
+        prenom: document.getElementById('prenom').value,
+        date_naissance: document.getElementById('date_naissance').value || null,
+        email: document.getElementById('email').value || null,
+        telephone: document.getElementById('telephone').value || null
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/patients`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          showMessage('formMessage', 'Patient ajouté avec succès!', 'success');
+          document.getElementById('patientForm').reset();
+          loadPatients();
+        } else {
+          const error = await response.json();
+          showMessage('formMessage', `Erreur: ${error.error}`, 'error');
+        }
+      } catch (err) {
+        showMessage('formMessage', `Erreur de connexion: ${err.message}`, 'error');
+      }
+    });
+
+    // Charger la liste des patients
+    async function loadPatients() {
+      try {
+        const response = await fetch(`${API_URL}/patients`);
+        
+        if (!response.ok) {
+          throw new Error('Erreur lors du chargement');
+        }
+
+        const patients = await response.json();
+        displayPatients(patients);
+      } catch (err) {
+        showMessage('listMessage', `Erreur: ${err.message}`, 'error');
+      }
+    }
+
+    // Afficher les patients dans un tableau
+    function displayPatients(patients) {
+      const container = document.getElementById('patientsTable');
+      
+      if (patients.length === 0) {
+        container.innerHTML = '<div class="empty-state">Aucun patient enregistré</div>';
+        return;
+      }
+
+      let html = '<table><thead><tr>';
+      html += '<th>ID</th><th>Nom</th><th>Prénom</th><th>Date de naissance</th>';
+      html += '<th>Email</th><th>Téléphone</th></tr></thead><tbody>';
+
+      patients.forEach(p => {
+        html += `<tr>
+          <td>${p.id}</td>
+          <td>${p.nom}</td>
+          <td>${p.prenom}</td>
+          <td>${p.date_naissance || '-'}</td>
+          <td>${p.email || '-'}</td>
+          <td>${p.telephone || '-'}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    // Afficher un message
+    function showMessage(elementId, message, type) {
+      const element = document.getElementById(elementId);
+      element.innerHTML = `<div class="message ${type}">${message}</div>`;
+      
+      setTimeout(() => {
+        element.innerHTML = '';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
